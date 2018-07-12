@@ -6,6 +6,7 @@ module Test.Pos.Core.Bi
 import           Universum
 
 import           Cardano.Crypto.Wallet (xprv, xpub)
+import           Crypto.Hash (Blake2b_224)
 import qualified Crypto.SCRAPE as Scrape
 import           Data.Coerce (coerce)
 import           Data.Fixed (Fixed (..))
@@ -16,68 +17,82 @@ import qualified Data.Map as M
 import           Data.Maybe (fromJust)
 import qualified Data.Text as T
 import           Data.Time.Units (Millisecond, fromMicroseconds)
+import           Data.Typeable (typeRep)
 import qualified Data.Vector as V
-import           Hedgehog (Property)
+import           Hedgehog (Gen, Property)
 import qualified Hedgehog as H
 
-import           Pos.Binary.Class (Raw (..), asBinary)
+import           Pos.Binary.Class (Bi, Case (..), Raw (..), SizeOverride (..),
+                                   asBinary, szCases)
 import           Pos.Core.Block (BlockHeader (..), BlockHeaderAttributes,
-                     BlockSignature (..), GenesisBlockHeader, GenesisBody (..),
-                     GenesisConsensusData (..), GenesisProof (..), HeaderHash,
-                     MainBlockHeader, MainBody (..), MainConsensusData (..),
-                     MainExtraBodyData (..), MainExtraHeaderData (..),
-                     MainProof (..), MainToSign (..), mkGenesisHeader,
-                     mkMainHeaderExplicit)
+                                 BlockSignature (..), GenesisBlockHeader,
+                                 GenesisBody (..), GenesisConsensusData (..),
+                                 GenesisProof (..), HeaderHash, MainBlockHeader,
+                                 MainBody (..), MainConsensusData (..),
+                                 MainExtraBodyData (..),
+                                 MainExtraHeaderData (..), MainProof (..),
+                                 MainToSign (..), mkGenesisHeader,
+                                 mkMainHeaderExplicit)
 import           Pos.Core.Common (AddrAttributes (..), AddrSpendingData (..),
-                     AddrStakeDistribution (..), AddrType (..),
-                     BlockCount (..), ChainDifficulty (..), Coeff (..),
-                     Coin (..), CoinPortion (..), IsBootstrapEraAddr (..),
-                     Script (..), ScriptVersion, SharedSeed (..), SlotLeaders,
-                     StakeholderId, StakesList, TxFeePolicy (..),
-                     TxSizeLinear (..), addressHash, makeAddress,
-                     makePubKeyAddress)
+                                  AddrStakeDistribution (..), AddrType (..),
+                                  BlockCount (..), ChainDifficulty (..),
+                                  Coeff (..), Coin (..), CoinPortion (..),
+                                  IsBootstrapEraAddr (..), Script (..),
+                                  ScriptVersion, SharedSeed (..), SlotLeaders,
+                                  StakeholderId, StakesList, TxFeePolicy (..),
+                                  TxSizeLinear (..), addressHash, makeAddress,
+                                  makePubKeyAddress)
 import           Pos.Core.Configuration (GenesisHash (..))
 import           Pos.Core.Delegation (DlgPayload (..), HeavyDlgIndex (..),
-                     LightDlgIndices (..), ProxySKBlockInfo, ProxySKHeavy)
+                                      LightDlgIndices (..), ProxySKBlockInfo,
+                                      ProxySKHeavy)
 import           Pos.Core.ProtocolConstants (ProtocolConstants (..))
 import           Pos.Core.Slotting (EpochIndex (..), EpochOrSlot (..),
-                     FlatSlotId, LocalSlotIndex (..), SlotCount (..),
-                     SlotId (..), TimeDiff (..), Timestamp (..))
+                                    FlatSlotId, LocalSlotIndex (..),
+                                    SlotCount (..), SlotId (..), TimeDiff (..),
+                                    Timestamp (..))
 import           Pos.Core.Ssc (Commitment, CommitmentSignature, CommitmentsMap,
-                     InnerSharesMap, Opening, OpeningsMap, SharesDistribution,
-                     SignedCommitment, SscPayload (..), SscProof (..),
-                     VssCertificate (..), VssCertificatesHash,
-                     VssCertificatesMap (..), mkCommitmentsMap,
-                     mkVssCertificate, mkVssCertificatesMap,
-                     randCommitmentAndOpening)
+                               InnerSharesMap, Opening, OpeningsMap,
+                               SharesDistribution, SignedCommitment,
+                               SscPayload (..), SscProof (..),
+                               VssCertificate (..), VssCertificatesHash,
+                               VssCertificatesMap (..), mkCommitmentsMap,
+                               mkVssCertificate, mkVssCertificatesMap,
+                               randCommitmentAndOpening)
 import           Pos.Core.Txp (Tx (..), TxAux (..), TxId, TxIn (..),
-                     TxInWitness (..), TxOut (..), TxOutAux (..),
-                     TxPayload (..), TxProof (..), TxSig, TxSigData (..),
-                     TxWitness, mkTxPayload)
+                               TxInWitness (..), TxOut (..), TxOutAux (..),
+                               TxPayload (..), TxProof (..), TxSig,
+                               TxSigData (..), TxWitness, mkTxPayload)
 import           Pos.Core.Update (ApplicationName (..), BlockVersion (..),
-                     BlockVersionData (..), BlockVersionModifier (..),
-                     SoftforkRule (..), SoftwareVersion (..), SystemTag (..),
-                     UpAttributes, UpId, UpdateData (..), UpdatePayload (..),
-                     UpdateProof, UpdateProposal, UpdateProposalToSign (..),
-                     UpdateVote (..), VoteId, mkUpdateProof,
-                     mkUpdateProposalWSign, mkUpdateVoteSafe)
+                                  BlockVersionData (..),
+                                  BlockVersionModifier (..), SoftforkRule (..),
+                                  SoftwareVersion (..), SystemTag (..),
+                                  UpAttributes, UpId, UpdateData (..),
+                                  UpdatePayload (..), UpdateProof,
+                                  UpdateProposal, UpdateProposalToSign (..),
+                                  UpdateVote (..), VoteId, mkUpdateProof,
+                                  mkUpdateProposalWSign, mkUpdateVoteSafe)
 import           Pos.Crypto (AbstractHash (..), EncShare (..),
-                     HDAddressPayload (..), Hash, ProtocolMagic (..),
-                     PublicKey (..), RedeemPublicKey, RedeemSignature,
-                     SafeSigner (..), Secret (..), SecretKey (..),
-                     SecretProof (..), SignTag (..), VssKeyPair,
-                     VssPublicKey (..), abstractHash, createPsk, decryptShare,
-                     deterministic, deterministicVssKeyGen, hash, proxySign,
-                     redeemDeterministicKeyGen, redeemSign, safeCreatePsk,
-                     sign, toPublic, toVssPublicKey)
+                             HDAddressPayload (..), Hash, ProtocolMagic (..),
+                             PublicKey (..), RedeemPublicKey, RedeemSignature,
+                             SafeSigner (..), Secret (..), SecretKey (..),
+                             SecretProof (..), SignTag (..), VssKeyPair,
+                             VssPublicKey (..), abstractHash, createPsk,
+                             decryptShare, deterministic,
+                             deterministicVssKeyGen, hash, proxySign,
+                             redeemDeterministicKeyGen, redeemSign,
+                             safeCreatePsk, sign, toPublic, toVssPublicKey)
 import           Pos.Data.Attributes (Attributes, mkAttributes)
 import           Pos.Merkle (mkMerkleTree, mtRoot)
 
 import           Serokell.Data.Memory.Units (Byte)
 
+import           Test.Pos.Binary.Helpers (SizeTestConfig (..), scfg, sizeTest)
 import           Test.Pos.Binary.Helpers.GoldenRoundTrip (discoverGolden,
-                     discoverRoundTrip, eachOf, goldenTestBi,
-                     roundTripsBiBuildable, roundTripsBiShow)
+                                                          discoverRoundTrip,
+                                                          eachOf, goldenTestBi,
+                                                          roundTripsBiBuildable,
+                                                          roundTripsBiShow)
 import           Test.Pos.Core.Gen
 import           Test.Pos.Crypto.Bi (getBytes)
 import           Test.Pos.Crypto.Gen (genProtocolMagic)
@@ -1733,10 +1748,44 @@ exampleProxySKBlockInfo = Just (staticProxySKHeavys !! 0, examplePublicKey)
 exampleLightDlgIndices :: LightDlgIndices
 exampleLightDlgIndices = LightDlgIndices (EpochIndex 7, EpochIndex 88)
 
+sizeEstimates :: H.Group
+sizeEstimates =
+  let check :: forall a. (Show a, Bi a) => Gen a -> Property
+      check g = sizeTest $ scfg { gen = g }
+      pm = ProtocolMagic 0
+      portionSize = (typeRep (Proxy @(Map (AbstractHash Blake2b_224 PublicKey) CoinPortion)),
+                     SizeConstant (szCases [ Case "min" 1, Case "max" 10 ]))
+  in H.Group "Encoded size bounds for core types."
+        [ ("Coin"                 , check genCoin)
+        , ("BlockCount"           , check genBlockCount)
+        , ("Address"              , sizeTest $ scfg
+              { gen = genAddress
+              , addlCtx = M.fromList
+                  [ (typeRep (Proxy @(Attributes AddrAttributes)),
+                        SizeExpression (\size -> 35 + size (Proxy @AddrStakeDistribution)))
+                  , portionSize
+                  ]
+              })
+        , ("AddrStakeDistribution", sizeTest $ scfg
+              { gen = genAddrStakeDistribution
+              , addlCtx = M.fromList [ portionSize ]
+              })
+        , ("AddrSpendingData"     , check genAddrSpendingData)
+        , ("AddrType"             , check genAddrType)
+        , ("Tx"                   , check genTx)
+        , ("TxIn"                 , check genTxIn)
+        , ("TxOut"                , check genTxOut)
+        , ("TxInWitness"          , check $ genTxInWitness pm)
+        , ("TxSigData"            , check genTxSigData)
+        ]
+
 -----------------------------------------------------------------------
 -- Main test export
 -----------------------------------------------------------------------
 
 tests :: IO Bool
-tests = (&&) <$> H.checkSequential $$discoverGolden
-             <*> H.checkParallel $$discoverRoundTrip
+tests = all id <$> sequence
+    [ H.checkSequential $$discoverGolden
+    , H.checkParallel $$discoverRoundTrip
+    , H.checkParallel sizeEstimates
+    ]
