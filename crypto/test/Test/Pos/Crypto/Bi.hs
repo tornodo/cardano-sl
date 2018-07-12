@@ -425,7 +425,7 @@ sizeEstimates = let check :: forall a. (Show a, Bi a) => Gen a -> Property
 --------------------------------------------------------------------------------
 
 tests :: IO Bool
-tests = all id <$> sequence
+tests = and <$> sequence
     [ H.checkSequential $$discoverGolden
     , H.checkSequential $$discoverRoundTrip
     , H.checkParallel sizeEstimates

@@ -1846,7 +1846,7 @@ sizeEstimates =
 -----------------------------------------------------------------------
 
 tests :: IO Bool
-tests = all id <$> sequence
+tests = and <$> sequence
     [ H.checkSequential $$discoverGolden
     , H.checkParallel $$discoverRoundTrip
     , H.checkParallel sizeEstimates
