@@ -212,5 +212,4 @@ benchmark bench-block
                      , generic-arbitrary
                      , random
                      , text
-                     , text-format
                      , universum

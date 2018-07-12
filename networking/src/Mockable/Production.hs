@@ -40,7 +40,7 @@ import           Mockable.SharedExclusive (SharedExclusive (..),
 
 newtype Production t = Production
     { runProduction :: IO t
-    } deriving (Functor, Applicative, Monad)
+    } deriving (Functor, Applicative, Monad, MonadMask)
 
 deriving instance MonadIO Production
 deriving instance MonadUnliftIO Production
@@ -151,12 +151,6 @@ newtype FailException = FailException String
 
 deriving instance Show FailException
 instance Exception.Exception FailException
-
-instance MonadMask Production where
-    mask act = Production $ mask $
-        \unmask -> runProduction $ act $ Production . unmask . runProduction
-    uninterruptibleMask act = Production $ uninterruptibleMask $
-        \unmask -> runProduction $ act $ Production . unmask . runProduction
 
 instance HasLoggerName Production where
     askLoggerName = return "*production*"
