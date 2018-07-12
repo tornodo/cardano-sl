@@ -15171,6 +15171,7 @@ license = stdenv.lib.licenses.mit;
 , hedgehog
 , hspec
 , lens
+, micro-recursion-schemes
 , mtl
 , pretty-show
 , QuickCheck
@@ -15182,6 +15183,7 @@ license = stdenv.lib.licenses.mit;
 , tagged
 , template-haskell
 , text
+, text-format
 , th-utilities
 , time-units
 , universum
@@ -15210,12 +15212,16 @@ digest
 formatting
 hashable
 lens
+micro-recursion-schemes
+mtl
+QuickCheck
 safe-exceptions
 safecopy
 serokell-util
 tagged
 template-haskell
 text
+text-format
 th-utilities
 time-units
 universum
@@ -15271,6 +15277,7 @@ license = stdenv.lib.licenses.mit;
 , cardano-sl-util-test
 , cborg
 , cereal
+, containers
 , cpphs
 , directory
 , file-embed
@@ -15284,6 +15291,7 @@ license = stdenv.lib.licenses.mit;
 , QuickCheck
 , quickcheck-instances
 , safecopy
+, serokell-util
 , stdenv
 , template-haskell
 , text
@@ -15307,6 +15315,8 @@ cardano-sl-binary
 cardano-sl-util-test
 cborg
 cereal
+containers
+cryptonite
 directory
 file-embed
 filepath
@@ -15319,6 +15329,8 @@ pretty-show
 QuickCheck
 quickcheck-instances
 safecopy
+serokell-util
+tagged
 template-haskell
 text
 universum
@@ -53207,6 +53219,34 @@ doHaddock = false;
 doCheck = false;
 description = "High-performance application metric tracking";
 license = stdenv.lib.licenses.mit;
+
+}) {};
+"micro-recursion-schemes" = callPackage
+({
+  mkDerivation
+, base
+, cpphs
+, stdenv
+, template-haskell
+, th-abstraction
+}:
+mkDerivation {
+
+pname = "micro-recursion-schemes";
+version = "5.0.2.2";
+sha256 = "3bddd1f22638f7e34563876e711e38351b8f36e50b45f3e5553068a2b25c5e9e";
+libraryHaskellDepends = [
+base
+template-haskell
+th-abstraction
+];
+libraryToolDepends = [
+cpphs
+];
+doHaddock = false;
+doCheck = false;
+description = "Simple recursion schemes";
+license = stdenv.lib.licenses.bsd3;
 
 }) {};
 "microformats2-parser" = callPackage
