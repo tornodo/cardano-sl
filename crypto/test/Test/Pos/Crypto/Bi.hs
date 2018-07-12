@@ -13,7 +13,7 @@ import           Universum
 import           Cardano.Crypto.Wallet (XPrv, unXPrv, xprv, xpub)
 
 import           Crypto.Hash (Blake2b_224, Blake2b_256, Blake2b_384,
-                              Blake2b_512, SHA1)
+                     Blake2b_512, SHA1)
 import qualified Data.ByteArray as ByteArray
 import qualified Data.ByteString as BS
 import           Data.List.NonEmpty (fromList)
@@ -23,26 +23,22 @@ import qualified Hedgehog as H
 
 import           Pos.Binary.Class (Bi)
 import           Pos.Crypto (AbstractHash, EncShare, PassPhrase,
-                             ProtocolMagic (..), ProxyCert, ProxySecretKey,
-                             PublicKey (..), RedeemSignature,
-                             SafeSigner (FakeSigner), Secret, SecretKey (..),
-                             SecretProof, SignTag (SignForTestingOnly),
-                             Signature, VssKeyPair, WithHash, decryptShare,
-                             deriveHDPassphrase, deterministic,
-                             deterministicVssKeyGen, genSharedSecret, hash,
-                             mkSigned, noPassEncrypt, packHDAddressAttr,
-                             proxySign, redeemDeterministicKeyGen, redeemSign,
-                             safeCreateProxyCert, safeCreatePsk, sign, toPublic,
-                             toVssPublicKey)
+                     ProtocolMagic (..), ProxyCert, ProxySecretKey,
+                     PublicKey (..), RedeemSignature, SafeSigner (FakeSigner),
+                     Secret, SecretKey (..), SecretProof,
+                     SignTag (SignForTestingOnly), Signature, VssKeyPair,
+                     WithHash, decryptShare, deriveHDPassphrase, deterministic,
+                     deterministicVssKeyGen, genSharedSecret, hash, mkSigned,
+                     noPassEncrypt, packHDAddressAttr, proxySign,
+                     redeemDeterministicKeyGen, redeemSign,
+                     safeCreateProxyCert, safeCreatePsk, sign, toPublic,
+                     toVssPublicKey)
 
 import           Test.Pos.Binary.Helpers (SizeTestConfig (..), scfg, sizeTest)
 import           Test.Pos.Binary.Helpers.GoldenRoundTrip (discoverGolden,
-                                                          discoverRoundTrip,
-                                                          eachOf, goldenTestBi,
-                                                          roundTripsAesonBuildable,
-                                                          roundTripsAesonShow,
-                                                          roundTripsBiBuildable,
-                                                          roundTripsBiShow)
+                     discoverRoundTrip, eachOf, goldenTestBi,
+                     roundTripsAesonBuildable, roundTripsAesonShow,
+                     roundTripsBiBuildable, roundTripsBiShow)
 import           Test.Pos.Crypto.Gen
 
 --------------------------------------------------------------------------------
