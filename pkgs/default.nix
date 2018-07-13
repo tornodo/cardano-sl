@@ -15252,6 +15252,7 @@ QuickCheck
 quickcheck-instances
 safecopy
 serokell-util
+tagged
 template-haskell
 text
 time-units
@@ -15839,6 +15840,7 @@ license = stdenv.lib.licenses.mit;
 , cardano-sl-util
 , cardano-sl-util-test
 , containers
+, cryptonite
 , data-default
 , generic-arbitrary
 , hedgehog
