@@ -15214,7 +15214,6 @@ hashable
 lens
 micro-recursion-schemes
 mtl
-QuickCheck
 safe-exceptions
 safecopy
 serokell-util
@@ -15279,6 +15278,7 @@ license = stdenv.lib.licenses.mit;
 , cereal
 , containers
 , cpphs
+, cryptonite
 , directory
 , file-embed
 , filepath
@@ -15330,7 +15330,6 @@ QuickCheck
 quickcheck-instances
 safecopy
 serokell-util
-tagged
 template-haskell
 text
 universum
