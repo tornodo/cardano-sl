@@ -40,14 +40,12 @@ instance ( Monad m
             tipHeader <- lift DB.getTipHeader
             let tipSlot = epochOrSlotToSlot (tipHeader ^. epochOrSlotG)
             unless (tipSlot <= curSlot) $
-                throwError
-                    SSInFuture
-                    {sslbCurrentSlot = curSlot, sslbTipSlot = tipSlot}
+                throwError $
+                    SSInFuture tipSlot curSlot
             let slotDiff = flattenSlotId curSlot - flattenSlotId tipSlot
             unless (slotDiff < fromIntegral lagBehindParam) $
-                throwError
-                    SSLagBehind
-                    {sslbCurrentSlot = curSlot, sslbTipSlot = tipSlot}
+                throwError $
+                    SSLagBehind tipSlot curSlot
       where
         recoveryIsInProgress = do
             var <- view (lensOf @RecoveryHeaderTag)
