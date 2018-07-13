@@ -15801,6 +15801,7 @@ cardano-sl-crypto-test
 cardano-sl-util
 cardano-sl-util-test
 containers
+cryptonite
 deepseq
 formatting
 generic-arbitrary
@@ -15840,7 +15841,6 @@ license = stdenv.lib.licenses.mit;
 , cardano-sl-util
 , cardano-sl-util-test
 , containers
-, cryptonite
 , data-default
 , generic-arbitrary
 , hedgehog
