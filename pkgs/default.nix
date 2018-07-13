@@ -15841,6 +15841,7 @@ license = stdenv.lib.licenses.mit;
 , cardano-sl-util
 , cardano-sl-util-test
 , containers
+, cryptonite
 , data-default
 , generic-arbitrary
 , hedgehog
