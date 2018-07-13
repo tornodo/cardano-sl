@@ -23,7 +23,7 @@ import           Wallet.Abstract
 import           Wallet.Inductive
 import           Wallet.Inductive.Cardano
 
-import qualified Wallet.Basic as Base
+import qualified Wallet.Rollback.Basic as Full
 
 {-------------------------------------------------------------------------------
   Compare the wallet kernel with the pure model
@@ -56,9 +56,8 @@ spec =
         AddrInfo{..} = resolveAddr addr transCtxt
         Just ekp     = addrInfoMasterKey
 
-    -- TODO: We should move to the full model instead of the base model
     mkWallet :: Hash h Addr => Ours Addr -> Transaction h Addr -> Wallet h Addr
-    mkWallet = walletBoot Base.walletEmpty
+    mkWallet = walletBoot Full.walletEmpty
 
 {-------------------------------------------------------------------------------
   Wallet resource management

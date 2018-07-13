@@ -206,7 +206,9 @@ equivalentT activeWallet esk = \mkWallet w ->
     walletRollbackT :: InductiveCtxt h
                     -> HD.HdAccountId
                     -> TranslateT (EquivalenceViolation h) m ()
-    walletRollbackT _ _ = error "walletRollbackT: TODO"
+    walletRollbackT ctxt accountId = do
+        liftIO $ Kernel.observableRollbackUseInTestsOnly passiveWallet
+        checkWalletState ctxt accountId
 
     checkWalletState :: InductiveCtxt h
                      -> HD.HdAccountId

@@ -17,6 +17,7 @@ module Cardano.Wallet.Kernel.DB.Util.IxSet (
   , getEQ
   , member
   , size
+  , toMap
     -- * Construction
   , fromList
   , omap
@@ -30,6 +31,7 @@ import qualified Control.Lens as Lens
 import           Data.Coerce (coerce)
 import           Data.Foldable (Foldable (..))
 import qualified Data.IxSet.Typed as IxSet
+import qualified Data.Map.Strict as Map
 import           Data.SafeCopy (SafeCopy (..))
 import qualified Data.Set as Set
 import qualified Data.Traversable
@@ -145,6 +147,16 @@ member pk = isJust . view (Lens.at pk)
 
 size :: IxSet a -> Int
 size = IxSet.size . unwrapIxSet
+
+-- | Project out the underlying set
+--
+-- Use with caution! This loses all the indices, potentially losing all the
+-- benefits that 'IxSet' provides.
+toMap :: HasPrimKey a => IxSet a -> Map (PrimKey a) a
+toMap = Map.mapKeysMonotonic (primKey . unwrapOrdByPrimKey)
+      . Map.fromSet unwrapOrdByPrimKey
+      . IxSet.toSet
+      . unwrapIxSet
 
 {-------------------------------------------------------------------------------
   Construction
